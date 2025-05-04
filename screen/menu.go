@@ -9,7 +9,6 @@ import (
 
 var (
 	filenameBuf    = []rune{}
-	tileSizeBuf    = []rune{}
 	levelWidthBuf  = []rune{}
 	levelHeightBuf = []rune{}
 	selectedInput  int
@@ -29,14 +28,8 @@ func HandleMenu() {
 	rl.ClearBackground(rl.RayWhite)
 
 	drawInputBox("Filename", &filenameBuf, int32(xStart), int32(yStart+lineSpacing*0), 0)
-	drawInputBox(
-		"Tile Size(dosent change shi it's basically the zoom of the editor, like 32 or sum is nice)",
-		&tileSizeBuf, int32(xStart),
-		int32(yStart+lineSpacing*1),
-		1,
-	)
-	drawInputBox("Level Width", &levelWidthBuf, int32(xStart), int32(yStart+lineSpacing*2), 2)
-	drawInputBox("Level Height", &levelHeightBuf, int32(xStart), int32(yStart+lineSpacing*3), 3)
+	drawInputBox("Level Width", &levelWidthBuf, int32(xStart), int32(yStart+lineSpacing*1), 1)
+	drawInputBox("Level Height", &levelHeightBuf, int32(xStart), int32(yStart+lineSpacing*2), 2)
 
 	if inputError {
 		rl.DrawText("Invalid number input!", int32(xStart), int32(yStart+lineSpacing*4), 20, rl.Red)
@@ -65,10 +58,10 @@ func HandleMenu() {
 
 func handleInput() {
 	if rl.IsKeyPressed(rl.KeyDown) {
-		selectedInput = (selectedInput + 1) % 4
+		selectedInput = (selectedInput + 1) % 3
 	}
 	if rl.IsKeyPressed(rl.KeyUp) {
-		selectedInput = (selectedInput + 3) % 4
+		selectedInput = (selectedInput + 2) % 3
 	}
 
 	char := rl.GetCharPressed()
@@ -79,7 +72,7 @@ func handleInput() {
 			if len(filenameBuf) < maxInputLength {
 				filenameBuf = append(filenameBuf, r)
 			}
-		case 1, 2, 3:
+		case 1, 2:
 			if r >= '0' && r <= '9' {
 				buf := getBuffer(selectedInput)
 				if len(*buf) < maxInputLength {
@@ -102,19 +95,17 @@ func handleInput() {
 }
 
 func handleDone() {
-	inpsFilled := len(filenameBuf) > 0 && len(tileSizeBuf) > 0 && len(levelWidthBuf) > 0 && len(levelHeightBuf) > 0
+	inpsFilled := len(filenameBuf) > 0 && len(levelWidthBuf) > 0 && len(levelHeightBuf) > 0
 	if !inpsFilled {
 		inputError = true
 		return
 	}
 
-	tileSize, err1 := strconv.Atoi(string(tileSizeBuf))
-	width, err2 := strconv.Atoi(string(levelWidthBuf))
-	height, err3 := strconv.Atoi(string(levelHeightBuf))
+	width, err1 := strconv.Atoi(string(levelWidthBuf))
+	height, err2 := strconv.Atoi(string(levelHeightBuf))
 
-	if err1 == nil && err2 == nil && err3 == nil {
+	if err1 == nil && err2 == nil {
 		level.Filename = string(filenameBuf)
-		level.TileSize = tileSize
 		level.LevelWidth = width
 		level.LevelHeight = height
 		inputError = false
@@ -166,10 +157,8 @@ func getBuffer(index int) *[]rune {
 	case 0:
 		return &filenameBuf
 	case 1:
-		return &tileSizeBuf
-	case 2:
 		return &levelWidthBuf
-	case 3:
+	case 2:
 		return &levelHeightBuf
 	}
 	return nil

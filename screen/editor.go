@@ -5,20 +5,45 @@ import (
 	"github.com/jmattaa/golvl/level"
 )
 
-var cameraOffset = rl.NewVector2(0, 0)
 var panSpeed float32 = 10
 
 var lastTileX, lastTileY = -1, -1
 
-func HandleEditor() {
+func HandleEditor(cam *rl.Camera2D) {
 	if rl.IsKeyPressed(rl.KeyE) {
 		level.ExportLvl()
 	}
 
+	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
+		cam.Offset.X -= panSpeed
+	}
+	if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
+		cam.Offset.X += panSpeed
+	}
+	if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
+		cam.Offset.Y -= panSpeed
+	}
+	if rl.IsKeyDown(rl.KeyUp) || rl.IsKeyDown(rl.KeyW) {
+		cam.Offset.Y += panSpeed
+	}
+
+	mouseWheel := rl.GetMouseWheelMove()
+
+	if mouseWheel > 0 && cam.Zoom < 10 {
+		cam.Zoom += .1
+	}
+	if mouseWheel < 0 && cam.Zoom > .01 {
+		cam.Zoom -= .1
+	}
+
+	mouse := rl.GetMousePosition()
+	worldMouse := rl.GetScreenToWorld2D(mouse, *cam)
+
 	rl.BeginDrawing()
+	rl.BeginMode2D(*cam)
 	rl.ClearBackground(rl.RayWhite)
 
-	tileSize := int32(level.TileSize)
+	tileSize := int32(32)
 	width := level.LevelWidth
 	height := level.LevelHeight
 
@@ -29,28 +54,13 @@ func HandleEditor() {
 		}
 	}
 
-	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
-		cameraOffset.X -= panSpeed
-	}
-	if rl.IsKeyDown(rl.KeyLeft) || rl.IsKeyDown(rl.KeyA) {
-		cameraOffset.X += panSpeed
-	}
-	if rl.IsKeyDown(rl.KeyDown) || rl.IsKeyDown(rl.KeyS) {
-		cameraOffset.Y -= panSpeed
-	}
-	if rl.IsKeyDown(rl.KeyUp) || rl.IsKeyDown(rl.KeyW) {
-		cameraOffset.Y += panSpeed
-	}
-
-	mouse := rl.GetMousePosition()
-
 	mouseTileX := -1
 	mouseTileY := -1
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			xPos := int32(x)*tileSize + int32(cameraOffset.X)
-			yPos := int32(y)*tileSize + int32(cameraOffset.Y)
+			xPos := int32(x) * tileSize
+			yPos := int32(y) * tileSize
 			rect := rl.NewRectangle(float32(xPos), float32(yPos), float32(tileSize), float32(tileSize))
 
 			color := rl.LightGray
@@ -66,7 +76,7 @@ func HandleEditor() {
 			rl.DrawRectangleRec(rect, color)
 			rl.DrawRectangleLines(xPos, yPos, tileSize, tileSize, rl.DarkGray)
 
-			if rl.CheckCollisionPointRec(mouse, rect) {
+			if rl.CheckCollisionPointRec(worldMouse, rect) {
 				mouseTileX = x
 				mouseTileY = y
 			}
@@ -84,5 +94,6 @@ func HandleEditor() {
 		lastTileY = -1
 	}
 
+	rl.EndMode2D()
 	rl.EndDrawing()
 }

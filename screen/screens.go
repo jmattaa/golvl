@@ -1,5 +1,7 @@
 package screen
 
+import rl "github.com/gen2brain/raylib-go/raylib"
+
 type ScreenType uint8
 
 const (
@@ -17,11 +19,11 @@ func Init() Screen {
 	return Screen{Type: SCRMenu}
 }
 
-func (s *Screen) Handle() {
+func (s *Screen) Handle(cam *rl.Camera2D) {
 	switch s.Type {
 	case SCRMenu:
 		HandleMenu()
 	case SCREditor:
-		HandleEditor()
+		HandleEditor(cam)
 	}
 }
