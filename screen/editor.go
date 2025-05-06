@@ -57,8 +57,8 @@ func HandleEditor(cam *rl.Camera2D) {
 	mouseTileX := -1
 	mouseTileY := -1
 
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
+	for y := range height {
+		for x := range width {
 			xPos := int32(x) * tileSize
 			yPos := int32(y) * tileSize
 			rect := rl.NewRectangle(float32(xPos), float32(yPos), float32(tileSize), float32(tileSize))
@@ -89,6 +89,12 @@ func HandleEditor(cam *rl.Camera2D) {
 			lastTileX = mouseTileX
 			lastTileY = mouseTileY
 		}
+	} else if rl.IsMouseButtonDown(rl.MouseRightButton) &&
+		mouseTileX != -1 &&
+		mouseTileY != -1 {
+		level.Tilemap[mouseTileY][mouseTileX] = 0
+		lastTileX = mouseTileX
+		lastTileY = mouseTileY
 	} else {
 		lastTileX = -1
 		lastTileY = -1
