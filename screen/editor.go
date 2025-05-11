@@ -11,7 +11,7 @@ var lastTileX, lastTileY = -1, -1
 
 func HandleEditor(cam *rl.Camera2D) {
 	if rl.IsKeyPressed(rl.KeyE) {
-		level.ExportLvl()
+		level.Export()
 	}
 
 	if rl.IsKeyDown(rl.KeyRight) || rl.IsKeyDown(rl.KeyD) {
